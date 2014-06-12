@@ -448,6 +448,7 @@ public class Display18Activity extends Activity implements View.OnClickListener 
             }
         } else {
             // back sub question
+            delegate.dataSubQuestion = null;
             this.setResult(3);
             finish();
         }

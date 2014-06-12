@@ -85,11 +85,6 @@ public class SplashActivity extends Activity {
         delegate = (questionniare_delegate)getApplicationContext();
 
 
-
-
-
-
-
         //text 2 postcode
 
     }
