@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -30,6 +29,7 @@ public class MySQLiteHelper {
 
     //contact fields
     public static final String PREFIX = "prefix";
+    public static final String PREFIX_VIP = "prefix_vip";
     public static final String FNAME = "fname";
     public static final String LNAME = "lname";
     public static final String NICKNAME = "nickname";
@@ -50,6 +50,8 @@ public class MySQLiteHelper {
     public static final String COUNTRY = "country";
     public static final String TEL = "tel";
     public static final String TEL_EXT = "tel_ext";
+    public static final String FLOOR = "floor";
+    public static final String ROOM = "room";
 
     //Save Questionnaire
     public static final String CUSTOMER_ID = "customerid";
@@ -70,9 +72,13 @@ public class MySQLiteHelper {
     public static final String DATABASE_TABLE_ADDRESS = "address";
     public static final String DATABASE_TABLE_ADDRESS_WORK = "address_work";
     public static final String DATABASE_TABLE_MOBILES = "mobiles";
+    public static final String DATABASE_TABLE_TELS = "tels";
     public static final String DATABASE_TABLE_SAVEQUESTIONNAIRE = "savequestionnaire";
     public static final String DATABASE_TABLE_SAVEANSWERS = "saveanswers";
     public static final String DATABASE_TABLE_SAVESTAFFANSWERS = "savestaffanswers";
+
+    public static final String DATABASE_TABLE_NATIONALITY = "nationality";
+    public static final String DATABASE_TABLE_COUNTRY = "country";
 
 
     public static final String CREATE_TABLE_PROJECT =
@@ -92,6 +98,7 @@ public class MySQLiteHelper {
     public static final String CREATE_TABLE_CONTACT = "create table "+DATABASE_TABLE_CONTACT
             +" (_id integer primary key autoincrement, "
             +PREFIX + " TEXT, "
+            +PREFIX_VIP + " TEXT, "
             +FNAME + " TEXT, "
             +LNAME + " TEXT, "
             +NICKNAME + " TEXT, "
@@ -103,6 +110,11 @@ public class MySQLiteHelper {
             +" (_id integer primary key autoincrement, "
             +"contactid INTEGER, "
             +MOBILE + " TEXT "
+            +" );";
+    public static final String CREATE_TABLE_TELS = "create table "+ DATABASE_TABLE_TELS
+            +" (_id integer primary key autoincrement, "
+            +"contactid INTEGER, "
+            +TEL + " TEXT "
             +" );";
 
     private static final String CREATE_TABLE_ADDRESS_WORK = "create table "+DATABASE_TABLE_ADDRESS_WORK
@@ -119,7 +131,9 @@ public class MySQLiteHelper {
             +POSTALCODE + " TEXT, "
             +COUNTRY + " TEXT, "
             +TEL + " TEXT, "
-            +TEL_EXT + " TEXT "
+            +TEL_EXT + " TEXT, "
+            +FLOOR + " TEXT, "
+            +ROOM + " TEXT "
             +" );";
 
     private static final String CREATE_TABLE_ADDRESS = "create table "+DATABASE_TABLE_ADDRESS
@@ -136,7 +150,9 @@ public class MySQLiteHelper {
             +POSTALCODE + " TEXT, "
             +COUNTRY + " TEXT, "
             +TEL + " TEXT, "
-            +TEL_EXT + " TEXT "
+            +TEL_EXT + " TEXT, "
+            +FLOOR + " TEXT, "
+            +ROOM + " TEXT "
             +" );";
 
     private static final String CREATE_TABLE_SAVEQUESTIONNAIRE = "create table "+DATABASE_TABLE_SAVEQUESTIONNAIRE
@@ -210,6 +226,17 @@ public class MySQLiteHelper {
             + " ); ";
 
 
+    public static final String CREATE_TABLE_NATIONALITY = "create table "+ DATABASE_TABLE_NATIONALITY +" ( "
+            +" id TEXT, "
+            +" title TEXT "
+            +" );";
+
+    public static final String CREATE_TABLE_COUNTRY = "create table "+ DATABASE_TABLE_COUNTRY+" ( "
+            +" id TEXT, "
+            +" title TEXT "
+            +" );";
+
+
     private final Context context;
     private DatabaseHelper DBHelper;
     public SQLiteDatabase db;
@@ -234,16 +261,19 @@ public class MySQLiteHelper {
             db.execSQL(CREATE_TABLE_CONTACT);
             db.execSQL(CRATE_TABLE_MOBILES);
             db.execSQL(CREATE_TABLE_ADDRESS_WORK);
-            Log.e("DB",CREATE_TABLE_ADDRESS_WORK);
+            //Log.e("DB",CREATE_TABLE_ADDRESS_WORK);
             db.execSQL(CREATE_TABLE_ADDRESS);
-            Log.e("DB",CREATE_TABLE_ADDRESS);
+            //Log.e("DB",CREATE_TABLE_ADDRESS);
             db.execSQL(CREATE_TABLE_SAVEQUESTIONNAIRE);
             db.execSQL(CREATE_TABLE_SAVEANSWERS);
             db.execSQL(CREATE_TABLE_SAVESTAFFANSWER);
+            db.execSQL(CREATE_TABLE_TELS);
 
             db.execSQL(CREATE_TABLE_PROVINCE);
             db.execSQL(CREATE_TABLE_DISTRICT);
             db.execSQL(CREATE_TABLE_SUBDISTRICT);
+            db.execSQL(CREATE_TABLE_NATIONALITY);
+            db.execSQL(CREATE_TABLE_COUNTRY);
         }
 
         @Override
@@ -488,9 +518,10 @@ public class MySQLiteHelper {
      * @param email
      * @return @rowid
      */
-    public long createContact(String prefix,String fname, String lname, String nickname,String birthdate, String email){
+    public long createContact(String prefix,String fname, String lname, String nickname,String birthdate, String email,String prefix_vip){
         ContentValues initialValues = new ContentValues();
         initialValues.put(PREFIX, prefix);
+        initialValues.put(PREFIX_VIP, prefix_vip);
         initialValues.put(FNAME, fname);
         initialValues.put(LNAME, lname);
         initialValues.put(NICKNAME, nickname);
@@ -516,7 +547,9 @@ public class MySQLiteHelper {
                                   String postalcode,
                                   String country,
                                   String tel,
-                                  String tel_ext){
+                                  String tel_ext,
+                                  String floor,
+                                  String room){
         ContentValues initialValues = new ContentValues();
         initialValues.put(CONTACT_ID, contactid);
         initialValues.put(MOO, moo);
@@ -530,6 +563,8 @@ public class MySQLiteHelper {
         initialValues.put(COUNTRY, country);
         initialValues.put(TEL, tel);
         initialValues.put(TEL_EXT, tel_ext);
+        initialValues.put(FLOOR, floor);
+        initialValues.put(ROOM, room);
         return this.db.insert(DATABASE_TABLE_ADDRESS_WORK, null, initialValues);
     }
     public long createAddress(Long contactid,
@@ -544,7 +579,9 @@ public class MySQLiteHelper {
                                   String postalcode,
                                   String country,
                                   String tel,
-                                  String tel_ext){
+                                  String tel_ext,
+                                  String floor,
+                                  String room){
         ContentValues initialValues = new ContentValues();
         initialValues.put(CONTACT_ID, contactid);
         initialValues.put(HOUSE_ID, house_id);
@@ -559,13 +596,15 @@ public class MySQLiteHelper {
         initialValues.put(COUNTRY, country);
         initialValues.put(TEL, tel);
         initialValues.put(TEL_EXT, tel_ext);
+        initialValues.put(FLOOR, floor);
+        initialValues.put(ROOM, room);
         return this.db.insert(DATABASE_TABLE_ADDRESS, null, initialValues);
     }
     public Cursor getContact(long rowId) throws SQLException {
 
         Cursor mCursor =
 
-                this.db.query(true, DATABASE_TABLE_CONTACT, new String[] { ROW_ID,PREFIX, FNAME,
+                this.db.query(true, DATABASE_TABLE_CONTACT, new String[] { ROW_ID,PREFIX,PREFIX_VIP,FNAME,
                         LNAME, NICKNAME,BIRTHDATE,EMAIL}, ROW_ID + "=" + rowId, null, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -586,7 +625,7 @@ public class MySQLiteHelper {
     public Cursor getAddressWork(long contactId){
         Cursor mCursor;
         mCursor = this.db.query(true,DATABASE_TABLE_ADDRESS_WORK,new String[]{HOUSE_ID,MOO,VILLAGE,SOI,ROAD,SUBDISTRICT,DISTRICT,PROVINCE,
-                POSTALCODE,COUNTRY,TEL,TEL_EXT},
+                POSTALCODE,COUNTRY,TEL,TEL_EXT,FLOOR,ROOM},
                 CONTACT_ID + "=" +contactId,null,null,null,null,null);
         return mCursor;
     }
@@ -596,7 +635,7 @@ public class MySQLiteHelper {
     public Cursor getAddress(long contactId){
         Cursor mCursor;
         mCursor = this.db.query(true,DATABASE_TABLE_ADDRESS,new String[]{HOUSE_ID,MOO,VILLAGE,SOI,ROAD,SUBDISTRICT,DISTRICT,PROVINCE,
-                        POSTALCODE,COUNTRY,TEL,TEL_EXT},
+                        POSTALCODE,COUNTRY,TEL,TEL_EXT,FLOOR,ROOM},
                 CONTACT_ID + "=" +contactId,null,null,null,null,null);
         return mCursor;
     }
@@ -679,6 +718,32 @@ public class MySQLiteHelper {
     }
     public Cursor getSubDistrictByDistrict(String _district_id){
         return this.db.query(TB_SUBDISTRICT, new String[]{SubDistrictID,SubDistrictName,PostCode},DistrictID + "= '"+_district_id+"' ",null,null,null,SubDistrictName);
+    }
+
+
+
+
+    public long createTel(Long contactid,String tel){
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(CONTACT_ID, contactid);
+        initialValues.put(TEL, tel);
+        return this.db.insert(DATABASE_TABLE_TELS, null, initialValues);
+    }
+    public Cursor getTels(long contactId){
+        Cursor mCursor = this.db.query(true,DATABASE_TABLE_TELS,new String[] {TEL},
+                CONTACT_ID + "=" +contactId,null,null,null,null,null);
+        return mCursor;
+    }
+    public boolean deleteTels(long contactId){
+        return this.db.delete(DATABASE_TABLE_TELS, CONTACT_ID + "=" + contactId, null) > 0;
+    }
+
+
+    public Cursor getAllCountry(){
+        return this.db.query(DATABASE_TABLE_COUNTRY, new String[] { "id","title"}, null, null, null, null, "title");
+    }
+    public Cursor getAllNationality(){
+        return this.db.query(DATABASE_TABLE_NATIONALITY, new String[] { "id","title"}, null, null, null, null, "title");
     }
 
     public boolean deleteQuestionnairExceptId(ArrayList<String> Ids,String proId){

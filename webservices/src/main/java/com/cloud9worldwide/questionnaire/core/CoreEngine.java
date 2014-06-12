@@ -579,7 +579,26 @@ public class CoreEngine {
                             }
                         }
 
+                        //Tels
+                        ArrayList<String> tels = new ArrayList<String>();
+                        if(contactObj.has("tels")) {
+                            JSONArray _tels_arr = contactObj.getJSONArray("tels");
+                            if (_tels_arr.length() > 0) {
+                                for (int i = 0; i < _tels_arr.length(); i++) {
+                                    JSONObject _telObj = _tels_arr.getJSONObject(i);
+                                    tels.add(_telObj.getString("tel"));
+                                }
+                            }
+                        }
+
                         //Address work
+                        String floor_w = "";
+                        if(_address_work_json.has("floor"))
+                            floor_w = _address_work_json.getString("floor");
+                        String room_w = "";
+                        if(_address_work_json.has("room"))
+                            room_w = _address_work_json.getString("room");
+
                         _address_work = new AddressData(
                                 _address_work_json.getString("house_id"),
                                 _address_work_json.getString("moo"),
@@ -592,10 +611,18 @@ public class CoreEngine {
                                 _address_work_json.getString("postalcode"),
                                 _address_work_json.getString("country"),
                                 _address_work_json.getString("tel"),
-                                _address_work_json.getString("tel_ext")
+                                _address_work_json.getString("tel_ext"),
+                                floor_w,
+                                room_w
                         );
 
                         //Address
+                        String floor = "";
+                        if(_address_json.has("floor"))
+                            floor = _address_json.getString("floor");
+                        String room = "";
+                        if(_address_json.has("room"))
+                            room = _address_json.getString("room");
                         _address = new AddressData(
                                 _address_json.getString("house_id"),
                                 _address_json.getString("moo"),
@@ -608,8 +635,13 @@ public class CoreEngine {
                                 _address_json.getString("postalcode"),
                                 _address_json.getString("country"),
                                 _address_json.getString("tel"),
-                                _address_json.getString("tel_ext")
+                                _address_json.getString("tel_ext"),
+                                floor,
+                                room
                         );
+                        String prifix_vip = "";
+                        if(contactObj.has("prifix_vip"))
+                            prifix_vip = contactObj.getString("prifix_vip");
 
                         _data = new ContactData(
                                 contactObj.getString("prefix"),
@@ -620,7 +652,9 @@ public class CoreEngine {
                                 contactObj.getString("email"),
                                 mobiles,
                                 _address_work,
-                                _address
+                                _address,
+                                tels,
+                                prifix_vip
                         );
                         return _data;
                     }else{
@@ -655,16 +689,28 @@ public class CoreEngine {
                     Cursor _address_work_cursor = _dbHelper.getAddressWork(contact_id);
                     Cursor _address_cursor = _dbHelper.getAddress(contact_id);
                     Cursor _contact_cursor = _dbHelper.getContact(contact_id);
+                    Cursor _tels_cursor = _dbHelper.getTels(contact_id);
 
 
                     //prepare mobiles data
                     ArrayList<String> _mobiles = new ArrayList<String>();
                     if(_mobiles_cursor != null){
-                        Log.e("test",String.valueOf(_mobiles_cursor.getCount()));
+                        //Log.e("test",String.valueOf(_mobiles_cursor.getCount()));
                         _mobiles_cursor.moveToFirst();
                         for (int i = 0; i < _mobiles_cursor.getCount(); i++) {
                             _mobiles.add(_mobiles_cursor.getString(0));
                             _mobiles_cursor.moveToNext();
+                        }
+                    }
+
+                    //prepare tels data
+                    ArrayList<String> _tels = new ArrayList<String>();
+                    if(_tels_cursor != null){
+                        //Log.e("test",String.valueOf(_mobiles_cursor.getCount()));
+                        _tels_cursor.moveToFirst();
+                        for (int i = 0; i < _tels_cursor.getCount(); i++) {
+                            _tels.add(_tels_cursor.getString(0));
+                            _tels_cursor.moveToNext();
                         }
                     }
 
@@ -684,10 +730,12 @@ public class CoreEngine {
                         String _country = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.COUNTRY));
                         String _tel = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL));
                         String _tel_ext = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                        String _floor = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.FLOOR));
+                        String _room = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.ROOM));
                         _address_work = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                                _district,_province,_postalcode,_country,_tel,_tel_ext);
+                                _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
                     }else{
-                        _address_work = new AddressData("","","","","","","","","","","","");
+                        _address_work = new AddressData("","","","","","","","","","","","","","");
                     }
 
                     //prepare address data
@@ -706,10 +754,12 @@ public class CoreEngine {
                         String _country = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.COUNTRY));
                         String _tel = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL));
                         String _tel_ext = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                        String _floor = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.FLOOR));
+                        String _room = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.ROOM));
                         _address = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                                _district,_province,_postalcode,_country,_tel,_tel_ext);
+                                _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
                     }else{
-                        _address = new AddressData("","","","","","","","","","","","");
+                        _address = new AddressData("","","","","","","","","","","","","","");
                     }
 
                     if(_contact_cursor != null){
@@ -720,7 +770,8 @@ public class CoreEngine {
                         String _nickname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.NICKNAME));
                         String _birthdate = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.BIRTHDATE));
                         String _email = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.EMAIL));
-                        _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address);
+                        String _prefix_vip = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.PREFIX_VIP));
+                        _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address,_tels,_prefix_vip);
                         _contact.setOffline("1");
                     }
                     _dbHelper.close();
@@ -757,6 +808,7 @@ public class CoreEngine {
             JSONObject jsonObj = new JSONObject();
             jsonObj.put("tokenaccess",globals.getLoginTokenAccess());
             jsonObj.put("prefix", _data.getPrefix());
+            jsonObj.put("prefix_vip", _data.getPrefix_vip());
             jsonObj.put("fname",_data.getFname());
             jsonObj.put("lname",_data.getLname());
             jsonObj.put("nickname",_data.getNickname());
@@ -772,6 +824,16 @@ public class CoreEngine {
                 mobile_js_arr.put(i,mobile);
             }
             jsonObj.put("mobiles",mobile_js_arr);
+
+            JSONArray tels_js_arr = new JSONArray();
+            ArrayList<String> _tels = _data.getTels();
+            for (int i = 0; i < _tels.size(); i++) {
+                JSONObject tel = new JSONObject();
+                tel.put("mobile",_tels.get(i));
+                tels_js_arr.put(i,tel);
+            }
+            jsonObj.put("tels",tels_js_arr);
+
 
             AddressData _address_work = _data.getAddressWork();
             AddressData _address = _data.getAddress();
@@ -790,6 +852,8 @@ public class CoreEngine {
             _address_work_js_obj.put("country",_address_work.getCountry());
             _address_work_js_obj.put("tel",_address_work.getTel());
             _address_work_js_obj.put("tel_ext",_address_work.getTelExt());
+            _address_work_js_obj.put("floor",_address_work.getFloor());
+            _address_work_js_obj.put("room",_address_work.getRoom());
 
             _address_js_obj.put("house_id",_address.getHouseId());
             _address_js_obj.put("moo",_address.getMoo());
@@ -803,6 +867,8 @@ public class CoreEngine {
             _address_js_obj.put("country",_address.getCountry());
             _address_js_obj.put("tel",_address.getTel());
             _address_js_obj.put("tel_ext",_address.getTelExt());
+            _address_js_obj.put("floor",_address.getFloor());
+            _address_js_obj.put("room",_address.getRoom());
 
             jsonObj.put("address_work",_address_work_js_obj);
             jsonObj.put("address",_address_js_obj);
@@ -856,25 +922,29 @@ public class CoreEngine {
         long _contactId = _dbHelper.createContact(
                 _data.getPrefix(),_data.getFname(),
                 _data.getLname(),_data.getNickname(),
-                _data.getBirthdate(),_data.getEmail());
+                _data.getBirthdate(),_data.getEmail(),_data.getPrefix_vip());
 
         if(_contactId > 0){
             ArrayList<String> _mobile = _data.getMobiles();
             for (int i = 0; i < _mobile.size(); i++) {
                 _dbHelper.createMobile(_contactId,_mobile.get(i));
             }
+
+            ArrayList<String> _tels = _data.getTels();
+            for (int i = 0; i < _tels.size(); i++) {
+                _dbHelper.createTel(_contactId,_tels.get(i));
+            }
+
             AddressData _address_work = _data.getAddressWork();
             _dbHelper.createAddressWork(_contactId,_address_work.getHouseId(),_address_work.getMoo(),_address_work.getVillage(),
                     _address_work.getSoi(),_address_work.getRoad(),_address_work.getSubdistrict(),_address_work.getDistrict(),
                     _address_work.getProvince(),_address_work.getPostalcode(),_address_work.getCountry(),_address_work.getTel(),
-                    _address_work.getTelExt());
+                    _address_work.getTelExt(),_address_work.getFloor(),_address_work.getRoom());
             AddressData _address = _data.getAddress();
             _dbHelper.createAddress(_contactId, _address.getHouseId(), _address.getMoo(), _address.getVillage(),
                     _address.getSoi(), _address.getRoad(), _address.getSubdistrict(), _address.getDistrict(),
                     _address.getProvince(), _address.getPostalcode(), _address.getCountry(), _address.getTel(),
-                    _address.getTelExt());
-
-
+                    _address.getTelExt(),_address.getFloor(),_address.getRoom());
         }
         globals.setContactId(String.valueOf(_contactId));
         globals.setIsCustomerLocal(true);
@@ -888,6 +958,7 @@ public class CoreEngine {
                 jsonObj.put("tokenaccess",globals.getLoginTokenAccess());
                 jsonObj.put("contactid",_data.getContactId());
                 jsonObj.put("prefix", _data.getPrefix());
+                jsonObj.put("prefix_vip", _data.getPrefix_vip());
                 jsonObj.put("fname",_data.getFname());
                 jsonObj.put("lname",_data.getLname());
                 jsonObj.put("nickname",_data.getNickname());
@@ -902,6 +973,16 @@ public class CoreEngine {
                     mobile_js_arr.put(i,mobile);
                 }
                 jsonObj.put("mobiles",mobile_js_arr);
+
+                JSONArray tel_js_arr = new JSONArray();
+                ArrayList<String> _tels = _data.getTels();
+                for (int i = 0; i < _tels.size(); i++) {
+                    JSONObject tel = new JSONObject();
+                    tel.put("tel",_tels.get(i));
+                    tel_js_arr.put(i,tel);
+                }
+                jsonObj.put("tels",tel_js_arr);
+
 
                 AddressData _address_work = _data.getAddressWork();
                 AddressData _address = _data.getAddress();
@@ -920,6 +1001,8 @@ public class CoreEngine {
                 _address_work_js_obj.put("country",_address_work.getCountry());
                 _address_work_js_obj.put("tel",_address_work.getTel());
                 _address_work_js_obj.put("tel_ext",_address_work.getTelExt());
+                _address_work_js_obj.put("floor",_address_work.getFloor());
+                _address_work_js_obj.put("room",_address_work.getRoom());
 
                 _address_js_obj.put("house_id",_address.getHouseId());
                 _address_js_obj.put("moo",_address.getMoo());
@@ -933,6 +1016,8 @@ public class CoreEngine {
                 _address_js_obj.put("country",_address.getCountry());
                 _address_js_obj.put("tel",_address.getTel());
                 _address_js_obj.put("tel_ext",_address.getTelExt());
+                _address_js_obj.put("floor",_address.getFloor());
+                _address_js_obj.put("room",_address.getRoom());
 
                 jsonObj.put("address_work",_address_work_js_obj);
                 jsonObj.put("address",_address_js_obj);
@@ -990,7 +1075,7 @@ public class CoreEngine {
                     Cursor _address_work_cursor = _dbHelper.getAddressWork(_contact_id);
                     Cursor _address_cursor = _dbHelper.getAddress(_contact_id);
                     Cursor _contact_cursor = _dbHelper.getContact(_contact_id);
-
+                    Cursor _tels_cursor = _dbHelper.getTels(_contact_id);
 
                     //prepare mobiles data
                     ArrayList<String> _mobiles = new ArrayList<String>();
@@ -999,6 +1084,16 @@ public class CoreEngine {
                         for (int i = 0; i < _mobiles_cursor.getCount(); i++) {
                             _mobiles.add(_mobiles_cursor.getString(0));
                             _mobiles_cursor.moveToNext();
+                        }
+                    }
+
+                    //prepare tels data
+                    ArrayList<String> _tels = new ArrayList<String>();
+                    if(_tels_cursor != null){
+                        _tels_cursor.moveToFirst();
+                        for (int i = 0; i < _tels_cursor.getCount(); i++) {
+                            _tels.add(_tels_cursor.getString(0));
+                            _tels_cursor.moveToNext();
                         }
                     }
 
@@ -1018,10 +1113,12 @@ public class CoreEngine {
                         String _country = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.COUNTRY));
                         String _tel = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL));
                         String _tel_ext = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                        String _floor = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.FLOOR));
+                        String _room = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.ROOM));
                         _address_work = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                                _district,_province,_postalcode,_country,_tel,_tel_ext);
+                                _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
                     }else{
-                        _address_work = new AddressData("","","","","","","","","","","","");
+                        _address_work = new AddressData("","","","","","","","","","","","","","");
                     }
 
                     //prepare address data
@@ -1040,21 +1137,24 @@ public class CoreEngine {
                         String _country = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.COUNTRY));
                         String _tel = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL));
                         String _tel_ext = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                        String _floor = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.FLOOR));
+                        String _room = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.ROOM));
                         _address = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                                _district,_province,_postalcode,_country,_tel,_tel_ext);
+                                _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
                     }else{
-                        _address = new AddressData("","","","","","","","","","","","");
+                        _address = new AddressData("","","","","","","","","","","","","","");
                     }
 
                     if(_contact_cursor != null){
                         _contact_cursor.moveToFirst();
                         String _prefix = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.PREFIX));
+                        String _prefix_vip = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.PREFIX_VIP));
                         String _fname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.FNAME));
                         String _lname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.LNAME));
                         String _nickname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.NICKNAME));
                         String _birthdate = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.BIRTHDATE));
                         String _email = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.EMAIL));
-                        _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address);
+                        _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address,_tels,_prefix_vip);
                         _contact.setOffline("1");
                     }
                     _dbHelper.close();
@@ -1256,6 +1356,7 @@ public class CoreEngine {
             Cursor _address_work_cursor = _dbHelper.getAddressWork(_contact_id);
             Cursor _address_cursor = _dbHelper.getAddress(_contact_id);
             Cursor _contact_cursor = _dbHelper.getContact(_contact_id);
+            Cursor _tels_cursor = _dbHelper.getTels(_contact_id);
 
 
             //prepare mobiles data
@@ -1265,6 +1366,16 @@ public class CoreEngine {
                 for (int i = 0; i < _mobiles_cursor.getCount(); i++) {
                     _mobiles.add(_mobiles_cursor.getString(0));
                     _mobiles_cursor.moveToNext();
+                }
+            }
+
+            //prepare tels data
+            ArrayList<String> _tels = new ArrayList<String>();
+            if(_tels_cursor != null){
+                _tels_cursor.moveToFirst();
+                for (int i = 0; i < _tels_cursor.getCount(); i++) {
+                    _tels.add(_tels_cursor.getString(0));
+                    _tels_cursor.moveToNext();
                 }
             }
 
@@ -1284,10 +1395,12 @@ public class CoreEngine {
                 String _country = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.COUNTRY));
                 String _tel = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL));
                 String _tel_ext = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                String _floor = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.FLOOR));
+                String _room = _address_work_cursor.getString(_address_work_cursor.getColumnIndex(_dbHelper.ROOM));
                 _address_work = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                        _district,_province,_postalcode,_country,_tel,_tel_ext);
+                        _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
             }else{
-                _address_work = new AddressData("","","","","","","","","","","","");
+                _address_work = new AddressData("","","","","","","","","","","","","","");
             }
 
             //prepare address data
@@ -1306,21 +1419,24 @@ public class CoreEngine {
                 String _country = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.COUNTRY));
                 String _tel = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL));
                 String _tel_ext = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.TEL_EXT));
+                String _floor = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.FLOOR));
+                String _room = _address_cursor.getString(_address_cursor.getColumnIndex(_dbHelper.ROOM));
                 _address = new AddressData(_house_id,_moo,_village,_soi,_road,_subdistrict,
-                        _district,_province,_postalcode,_country,_tel,_tel_ext);
+                        _district,_province,_postalcode,_country,_tel,_tel_ext,_floor,_room);
             }else{
-                _address = new AddressData("","","","","","","","","","","","");
+                _address = new AddressData("","","","","","","","","","","","","","");
             }
 
             if(_contact_cursor != null){
                 _contact_cursor.moveToFirst();
                 String _prefix = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.PREFIX));
+                String _prefix_vip = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.PREFIX_VIP));
                 String _fname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.FNAME));
                 String _lname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.LNAME));
                 String _nickname = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.NICKNAME));
                 String _birthdate = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.BIRTHDATE));
                 String _email = _contact_cursor.getString(_contact_cursor.getColumnIndex(_dbHelper.EMAIL));
-                _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address);
+                _contact = new ContactData(_prefix,_fname,_lname,_nickname,_birthdate,_email,_mobiles,_address_work,_address,_tels,_prefix_vip);
                 _contact.setOffline("1");
             }
             _dbHelper.close();
@@ -1482,6 +1598,7 @@ public class CoreEngine {
         _dbHelper.deleteAddressWork(contactId);
         _dbHelper.deleteAddress(contactId);
         _dbHelper.deleteContact(contactId);
+        _dbHelper.deleteTels(contactId);
         _dbHelper.close();
     }
     public ArrayList<QuestionTypeData> getQuestionnaireData(String _questionnaire_id, String _timestamp){
@@ -1711,6 +1828,121 @@ public class CoreEngine {
         _dbHelper.close();
         return  data;
     }
+
+
+    public synchronized void initCountryData(Context ctx){
+        MySQLiteHelper _dbHelper = new MySQLiteHelper(this.mCtx);
+        _dbHelper.open();
+        _dbHelper.deleteAll(_dbHelper.DATABASE_TABLE_COUNTRY);
+        try {
+            InputStreamReader is = new InputStreamReader(ctx.getAssets()
+                    .open("tbl_CountryInfo.csv"));
+
+            BufferedReader buffer = new BufferedReader(is);
+
+            String line = "";
+            String tableName = _dbHelper.DATABASE_TABLE_COUNTRY;
+            String columns = " id, title";
+            String str1 = "INSERT INTO " + tableName + " (" + columns + ") values(";
+            String str2 = ");";
+
+            _dbHelper.db.beginTransaction();
+            int i =0;
+            while ((line = buffer.readLine()) != null) {
+                if(i > 0) {
+                    StringBuilder sb = new StringBuilder(str1);
+                    String[] str = line.split(",");
+                    sb.append("'" + str[0] + "',");
+                    sb.append("'" + str[1] + "'");
+                    sb.append(str2);
+                    _dbHelper.db.execSQL(sb.toString());
+                }
+                i++;
+            }
+
+            _dbHelper.db.setTransactionSuccessful();
+            _dbHelper.db.endTransaction();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.e(debugTag,e.getMessage());
+        }
+
+        _dbHelper.close();
+    }
+    public synchronized void initNationalityData(Context ctx){
+        MySQLiteHelper _dbHelper = new MySQLiteHelper(this.mCtx);
+        _dbHelper.open();
+        _dbHelper.deleteAll(_dbHelper.DATABASE_TABLE_NATIONALITY);
+        try {
+            InputStreamReader is = new InputStreamReader(ctx.getAssets()
+                    .open("tbl_Nationality.csv"));
+
+            BufferedReader buffer = new BufferedReader(is);
+
+            String line = "";
+            String tableName = _dbHelper.DATABASE_TABLE_NATIONALITY;
+            String columns = " id, title";
+            String str1 = "INSERT INTO " + tableName + " (" + columns + ") values(";
+            String str2 = ");";
+
+            _dbHelper.db.beginTransaction();
+            int i =0;
+            while ((line = buffer.readLine()) != null) {
+                if(i > 0) {
+                    StringBuilder sb = new StringBuilder(str1);
+                    String[] str = line.split(",");
+                    sb.append("'" + str[0] + "',");
+                    sb.append("'" + str[1] + "'");
+                    sb.append(str2);
+                    _dbHelper.db.execSQL(sb.toString());
+                }
+                i++;
+            }
+
+            _dbHelper.db.setTransactionSuccessful();
+            _dbHelper.db.endTransaction();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.e(debugTag,e.getMessage());
+        }
+
+        _dbHelper.close();
+    }
+
+    public ArrayList<ValTextData> getCountry(){
+        ArrayList<ValTextData> data = new ArrayList<ValTextData>();
+        data.add(0,new ValTextData("0","กรุณาเลือก"));
+        MySQLiteHelper _dbHelper = new MySQLiteHelper(this.mCtx);
+        _dbHelper.open();
+        Cursor _cursor = _dbHelper.getAllCountry();
+        if(_cursor != null)
+            _cursor.moveToFirst();
+        for (int i = 0; i < _cursor.getCount(); i++) {
+            ValTextData val = new ValTextData(_cursor.getString(0),_cursor.getString(1));
+            data.add(val);
+            _cursor.moveToNext();
+        }
+        _dbHelper.close();
+        return data;
+    }
+    public ArrayList<ValTextData> getNationality(){
+        ArrayList<ValTextData> data = new ArrayList<ValTextData>();
+        data.add(0,new ValTextData("0","กรุณาเลือก"));
+        MySQLiteHelper _dbHelper = new MySQLiteHelper(this.mCtx);
+        _dbHelper.open();
+        Cursor _cursor = _dbHelper.getAllNationality();
+        if(_cursor != null)
+            _cursor.moveToFirst();
+        for (int i = 0; i < _cursor.getCount(); i++) {
+            ValTextData val = new ValTextData(_cursor.getString(0),_cursor.getString(1));
+            data.add(val);
+            _cursor.moveToNext();
+        }
+        _dbHelper.close();
+        return data;
+    }
     /**
      * Forgor password Method
      * @param params [ 0 - email ]
@@ -1794,6 +2026,51 @@ public class CoreEngine {
         {
             e.printStackTrace();
         }
+    }
+    public synchronized ArrayList<QuestionAnswerData> getQuestionnaireAnswerHistory(String _questionnaire_id){
+        ArrayList<QuestionAnswerData> _data = new ArrayList<QuestionAnswerData>();
+        if(isOnline() && !globals.getIsCustomerLocal()) {
+            try{
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("tokenaccess",globals.getLoginTokenAccess());
+                jsonObj.put("questionnaireid",_questionnaire_id);
+                jsonObj.put(PARAM_CUSTOMERID,String.valueOf(globals.getContactId()));
+
+                try{
+                    String r = AnswerHistoryMethod.execute(this.mCtx, webserviceUrl, jsonObj.toString());
+                    JSONObject respObj = new JSONObject(r);
+                    if(respObj.getBoolean("status")) {
+
+                        JSONArray _question_ans_json = respObj.getJSONArray("result");
+                        for (int i = 0; i < _question_ans_json.length(); i++) {
+                            JSONObject _question = _question_ans_json.getJSONObject(i);
+                            String _question_id = _question.getString("questionId");
+                            JSONArray _ans_json = _question.getJSONArray("answer");
+                            ArrayList<SaveAnswerData> _ans = new ArrayList<SaveAnswerData>();
+                            for (int j = 0; j < _ans_json.length(); j++) {
+                                JSONObject _ans_h = _ans_json.getJSONObject(j);
+                                _ans.add(new SaveAnswerData(_ans_h.getString("value"),_ans_h.getString("freetxt")));
+                            }
+
+                            QuestionAnswerData _question_ans = new QuestionAnswerData(_question_id,_ans);
+                            _data.add(_question_ans);
+                        }
+                    }else{
+                        this.responseMessage = respObj.getJSONObject("result").getString("message");
+                    }
+                }
+                catch (AnswerHistoryMethod.ApiException ae)
+                {
+                    ae.printStackTrace();
+                }
+
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+
+        return _data;
+
     }
     public synchronized ArrayList<SaveAnswerData> getAnswerHistory(String _question_id){
         ArrayList<SaveAnswerData> _ans = new ArrayList<SaveAnswerData>();

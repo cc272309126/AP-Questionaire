@@ -201,7 +201,7 @@ public class CustomerLookUpActivity extends Activity implements OnClickListener 
                     @Override
                     public void run() {
                         ArrayList<ContactSearchData> searchData = delegate.service.searchContact(txtFirstName.getText().toString() , txtLastName.getText().toString(), txtTel.getText().toString());
-
+                        delegate.setCustomer_list(new ArrayList<ContactSearchData>());
                         if(searchData != null){
                             if(searchData.size() != 0 ){
                                 delegate.setCustomer_list(searchData);

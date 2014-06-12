@@ -96,7 +96,7 @@ public class AddCustomerActivity extends Activity implements OnClickListener {
 
         if (delegate.customer_selected != null) {
             customer_selected = delegate.customer_selected;
-
+            txtPrefix.setText(customer_selected.getPrefix());
             txtFirstName.setText(customer_selected.getFname());
             txtLastName.setText(customer_selected.getLname());
             txtNickname.setText(customer_selected.getNickname());

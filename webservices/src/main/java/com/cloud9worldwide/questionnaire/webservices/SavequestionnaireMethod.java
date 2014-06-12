@@ -2,6 +2,8 @@ package com.cloud9worldwide.questionnaire.webservices;
 
 import android.content.Context;
 
+import com.cloud9worldwide.questionnaire.task.SavequestionnaireAPITask;
+
 /**
  * Created by cloud9 on 4/18/14.
  */
@@ -19,6 +21,7 @@ public class SavequestionnaireMethod {
         }
     }
     public static synchronized String execute(Context _context, String... params) throws ApiException {
+        /*
         String command = "savequestionnaire";
         Boolean _error = false;
         String _error_msg = null;
@@ -49,7 +52,8 @@ public class SavequestionnaireMethod {
         }else {
             return "{\"status\":false,\"result\":{\"message\":\""+_error_msg+"\"}}";
         }
-        /*
+        */
+
         SavequestionnaireAPITask _task = new SavequestionnaireAPITask(_context);
         try {
             _task.execute(params);
@@ -58,6 +62,6 @@ public class SavequestionnaireMethod {
             _task.cancel(true);
             throw new ApiException("Problem connecting to the server " + e.getMessage(), e);
         }
-        */
+
     }
 }

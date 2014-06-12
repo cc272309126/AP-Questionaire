@@ -55,6 +55,8 @@ public class SplashActivity extends Activity {
                     delegate.service.initProvincesData(SplashActivity.this);
                     delegate.service.initDistrictData(SplashActivity.this);
                     delegate.service.initSubDistrictData(SplashActivity.this);
+                    delegate.service.initCountryData(SplashActivity.this);
+                    delegate.service.initNationalityData(SplashActivity.this);
                 }
 
                 if(delegate.service.getLoginStatus()){

@@ -50,7 +50,7 @@ public class questionniare_delegate extends Application {
 
     public QuestionTypeData dataSubQuestion;
 
-    public long timesleep = 500;
+    public long timesleep = 100;
 
     TCImageLoader imageLoader;
     int imgDefault, imgDefaultQuestion, imgDefaultIcon,imgDefaultIconSelect;
@@ -374,16 +374,28 @@ public class questionniare_delegate extends Application {
 
     public synchronized ArrayList<SaveAnswerData> getHistory(){
         ArrayList<SaveAnswerData> answer = new ArrayList<SaveAnswerData>();
-        if(service.isOnline() && !service.globals.getIsCustomerLocal()){
-            answer =  service.getAnswerHistory(String.valueOf(QM.get_question().getQuestion().getId()));
-            if(answer.size()==1){
-                if(Integer.parseInt(answer.get(0).getValue()) == -1){
-                    answer.remove(0);
+        if(this.AllHistoryAnswer != null) {
+            String _q_id = QM.get_question().getQuestion().getId().toString();
+            for (int i = 0; i < this.AllHistoryAnswer.size(); i++) {
+                QuestionAnswerData q_ans = this.AllHistoryAnswer.get(i);
+
+                if (q_ans.getQuestionId().equals(_q_id)) {
+                    answer = q_ans.getAnswer();
                 }
             }
         }
         return answer;
     }
+    private ArrayList<QuestionAnswerData> AllHistoryAnswer = null;
+    public synchronized ArrayList<QuestionAnswerData> getQuestionnaireHistory(){
+        ArrayList<QuestionAnswerData> questionnaireAnswer = new ArrayList<QuestionAnswerData>();
+        if(service.isOnline() && !service.globals.getIsCustomerLocal()){
+            questionnaireAnswer =  service.getQuestionnaireAnswerHistory(String.valueOf(this.getQuestionnaire_selected_id()));
+        }
+        AllHistoryAnswer = questionnaireAnswer;
+        return questionnaireAnswer;
+    }
+
 
 
     public int dpToPx(int dp) {

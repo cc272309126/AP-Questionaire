@@ -19,6 +19,8 @@ public class AddressData {
     private String country;
     private String tel;
     private String telExt;
+    private String floor;
+    private String room;
 
     public AddressData(String _houseId, String _moo, String _village, String _soi,
                        String _road, String _subdistrict, String _district, String _province, String _postalcode,
@@ -35,6 +37,40 @@ public class AddressData {
         this.country = _country;
         this.tel = _tel;
         this.telExt = _telExt;
+    }
+    public AddressData(String _houseId, String _moo, String _village, String _soi,
+                       String _road, String _subdistrict, String _district, String _province, String _postalcode,
+                       String _country, String _tel, String _telExt,String _floor,String _room){
+        this.houseId = _houseId;
+        this.moo = _moo;
+        this.village = _village;
+        this.soi = _soi;
+        this.road = _road;
+        this.subdistrict = _subdistrict;
+        this.district = _district;
+        this.province = _province;
+        this.postalcode = _postalcode;
+        this.country = _country;
+        this.tel = _tel;
+        this.telExt = _telExt;
+        this.floor = _floor;
+        this.road = _room;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
     }
 
     public void setHouseId(String houseId) {
@@ -147,6 +183,8 @@ public class AddressData {
             obj.put("country",this.country);
             obj.put("tel",this.tel);
             obj.put("telExt",this.telExt);
+            obj.put("floor",this.floor);
+            obj.put("room",this.room);
         }catch (JSONException e){
             e.printStackTrace();
         }
@@ -167,6 +205,8 @@ public class AddressData {
             obj.put("country",this.country);
             obj.put("tel",this.tel);
             obj.put("telExt",this.telExt);
+            obj.put("floor",this.floor);
+            obj.put("room",this.room);
         }catch (JSONException e){
             e.printStackTrace();
         }

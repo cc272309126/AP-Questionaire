@@ -268,8 +268,6 @@ public class CustomerInfomationActivity extends Activity implements View.OnClick
             } else {
                 delegate.customer_selected = customer_info;
                 delegate.initQuestions();
-//                delegate.setIndex_question(0);
-//                Log.e(TAG, delegate.questions.get(delegate.index_question).getQuestionType());
 
                 Intent newPage = new Intent();
                 if(delegate.QM.get_question().getQuestionType().equals("1")){
@@ -315,7 +313,49 @@ public class CustomerInfomationActivity extends Activity implements View.OnClick
                 } else if(delegate.QM.get_question().getQuestionType().equals("21")){
                     newPage = new Intent(this, Display21Activity.class);
                 }
-                startActivityForResult(newPage,0);
+
+                final Intent _newPage = newPage;
+                if(delegate.service.isOnline()) {
+                    final ProgressDialog progress = new ProgressDialog(this);
+                    progress.setTitle("Please wait");
+                    progress.setMessage("Loading....");
+                    progress.setCancelable(false);
+                    progress.show();
+
+                    final Handler uiHandler = new Handler();
+                    final Runnable onUi = new Runnable() {
+                        @Override
+                        public void run() {
+                            // this will run on the main UI thread
+                            progress.dismiss();
+                            startActivityForResult(_newPage,0);
+                        }
+                    };
+                    Runnable background = new Runnable() {
+                        @Override
+                        public void run() {
+                            delegate.getQuestionnaireHistory();
+                            //delay
+                            try {
+                                Thread.sleep(500);
+                            } catch (Exception e) {
+
+                            }
+                            uiHandler.post(onUi);
+                        }
+                    };
+                    new Thread(background).start();
+
+                }else{
+                    startActivityForResult(_newPage,0);
+                }
+
+
+
+//                delegate.setIndex_question(0);
+//                Log.e(TAG, delegate.questions.get(delegate.index_question).getQuestionType());
+
+
             }
         } else if(v.getId() == R.id.btnBack){
             if(popup.isShowing()){

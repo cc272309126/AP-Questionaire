@@ -26,14 +26,19 @@ public class AnswerData {
     public Integer itemOrder;
 
     private String FreeTxtType;
+    private String FreeTxtMaxChar;
     private boolean hassubquestion;
     private int subquestion_id = -1;
 
-
+    public String getFreeTxtMaxChar() {
+        return FreeTxtMaxChar;
+    }
+    public void setFreeTxtMaxChar(String freeTxtMaxChar) {
+        FreeTxtMaxChar = freeTxtMaxChar;
+    }
     public int getSubquestion_id() {
         return subquestion_id;
     }
-
     public void setSubquestion_id(int subquestion_id) {
         this.subquestion_id = subquestion_id;
     }
@@ -61,6 +66,13 @@ public class AnswerData {
                 this.FreeTxtType = _answer.getString("FreeTxtType");
             }else{
                 this.FreeTxtType = "0";
+            }
+
+            //check freetext type
+            if(this.isFreeTxt && _answer.has("FreeTxtMaxChar")){
+                this.FreeTxtMaxChar = _answer.getString("FreeTxtMaxChar");
+            }else{
+                this.FreeTxtMaxChar = "0";
             }
 
             //check has sub question
@@ -108,6 +120,8 @@ public class AnswerData {
             obj.put("id",this.id);
             obj.put("title",this.title);
             obj.put("isFreeTxt",this.isFreeTxt);
+            obj.put("FreeTxtType",this.FreeTxtType);
+            obj.put("FreeTxtMaxChar",this.FreeTxtMaxChar);
             obj.put("iconActiveUrl",this.iconActiveUrl);
             obj.put("iconInActiveUrl",this.iconInActiveUrl);
             obj.put("imageUrl",this.imageUrl);
@@ -124,6 +138,8 @@ public class AnswerData {
             obj.put("id",this.id);
             obj.put("title",this.title);
             obj.put("isFreeTxt",this.isFreeTxt);
+            obj.put("FreeTxtType",this.FreeTxtType);
+            obj.put("FreeTxtMaxChar",this.FreeTxtMaxChar);
             obj.put("iconActiveUrl",this.iconActiveUrl);
             obj.put("iconInActiveUrl",this.iconInActiveUrl);
             obj.put("imageUrl",this.imageUrl);
